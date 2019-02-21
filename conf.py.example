@@ -1,0 +1,5 @@
+#path and name input file
+input_file = '.\source.json'
+
+#path and name output file
+output_file = '.\index.html'
