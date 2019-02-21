@@ -22,10 +22,7 @@ class ConverterJsonToHtml():
 
         result = ""
         for tag in block:
-            if tag == "title":
-                result += "<h1>" + block[tag] + "</h1>"
-            elif tag == "body":
-                result += "<p>" + block[tag] + "</p>"
+            result += "<" + tag + ">" + block[tag] + "</" + tag + ">"
         return result
 
     def _save_to_file(self, html_code):
