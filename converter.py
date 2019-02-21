@@ -1,5 +1,7 @@
 import conf
 import json
+import re
+import html_encode_symbols
 
 
 def ul_decoration(function_to_decorate):
@@ -28,6 +30,40 @@ class ConverterJsonToHtml():
         file = open(conf.input_file)
         return json.loads(file.read())
 
+    def _parsing_tag(self, tag):
+        """
+        Generates opening and closing tags.
+        :param tag: string containing tag name, html classes, html id
+        :return: tuple of strings with opened and closed tag
+        """
+
+        pattern = "(?P<name>[\w\d])(?P<classes>\.*[^#]*)#?(?P<id>[^.#]*)"
+        regex = re.match(pattern, tag)
+        start_tag = ""
+        finish_tag = regex.group('name')
+        start_tag += regex.group("name")
+        if regex.group("id") is not '':
+            start_tag += " id=\"" + regex.group("id") + "\""
+        if regex.group("classes") is not "":
+            start_tag += " class=\""
+            for class_name in regex.group("classes").split('.'):
+                if class_name is not '':
+                    start_tag += class_name + " "
+            start_tag = start_tag[:-1]
+            start_tag += "\""
+        return (start_tag, finish_tag)
+
+    def _encode_body(self, body):
+        """
+        Encodes characters with html codes.
+        :param body: string with html elements
+        :return: string without html elemnts
+        """
+
+        for symbol, code in html_encode_symbols.encode_symbols.items():
+            body = body.replace(symbol, code)
+        return body
+
     def _generation_html_block(self, block):
         """
         Generates html code from one block (element of list).
@@ -36,11 +72,12 @@ class ConverterJsonToHtml():
         """
 
         result = ""
-        for tag in block:
-            if type(block[tag]) is list:
-                result += "<" + tag + ">" + self._parsing_python_object(block[tag]) + "</" + tag + ">"
+        for tag, body in block.items():
+            start_tag, finish_tag = self._parsing_tag(tag)
+            if type(body) is list:
+                result += "<" + start_tag + ">" + self._parsing_python_object(body) + "</" + finish_tag + ">"
             else:
-                result += "<" + tag + ">" + block[tag] + "</" + tag + ">"
+                result += "<" + start_tag + ">" + self._encode_body(body) + "</" + finish_tag + ">"
         return result
 
     def _save_to_file(self, html_code):
