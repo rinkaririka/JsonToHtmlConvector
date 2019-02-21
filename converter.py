@@ -37,7 +37,10 @@ class ConverterJsonToHtml():
 
         result = ""
         for tag in block:
-            result += "<" + tag + ">" + block[tag] + "</" + tag + ">"
+            if type(block[tag]) is list:
+                result += "<" + tag + ">" + self._parsing_python_object(block[tag]) + "</" + tag + ">"
+            else:
+                result += "<" + tag + ">" + block[tag] + "</" + tag + ">"
         return result
 
     def _save_to_file(self, html_code):
